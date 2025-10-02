@@ -3,7 +3,7 @@
 ## OpenTelemetry Core Principles
 
 ### Three Pillars
-- Use **OpenTelemetry** for:
+  - Use **OpenTelemetry** for:
   - Distributed tracing
   - Metrics collection
   - Structured logging
@@ -66,6 +66,7 @@ Record important attributes:
   - Counters
   - Gauges
   - Histograms
+- Avoid high-cardinality labels, e.g user IDs, session IDs, etc.
 
 ### Key Metrics
 Monitor application health via:
@@ -105,9 +106,9 @@ Include in logs:
 - Error details (with stack traces when helpful)
 - Relevant business context
 
-## Alerting Strategy
+## Alerting Strategy apply only when asked
 
-### Alert Conditions
+### Alert Conditions 
 Define alerts for:
 - High 5xx error rates
 - Database connection errors
@@ -134,23 +135,6 @@ Define alerts for:
 - Ensure critical paths are always traced.
 
 ## Middleware Integration
-
-### HTTP Middleware
-```go
-func TracingMiddleware(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        ctx, span := tracer.Start(r.Context(), "http.request")
-        defer span.End()
-        
-        span.SetAttributes(
-            attribute.String("http.method", r.Method),
-            attribute.String("http.path", r.URL.Path),
-        )
-        
-        next.ServeHTTP(w, r.WithContext(ctx))
-    })
-}
-```
 
 ### Automatic Instrumentation
 - Use middleware to instrument endpoints automatically.

@@ -154,7 +154,7 @@ func GetUser(ctx context.Context, db db.DbExecutor id string) (*User, error) {
 
 // named update or insert
 func UpdateUser(ctx context.Context, dbEx db.DbExecutor user User) error {
-	updateUserQuery := `UPDATE users SET name = :name, email = :email WHERE id = :id`
+	updateUserQuery := `update users set name = :name, email = :email where id = :id`
 	_, err := dbEx.NamedExecContext(ctx, updateUserQuery, user)
 	if err != nil {
 		return fmt.Errorf("failed to update user: %w", err)
@@ -177,9 +177,9 @@ func UpdateUser(ctx context.Context, dbEx db.DbExecutor user User) error {
 // Good: Single query with JOIN
 func (r *Repository) GetUsersWithOrders(ctx context.Context) ([]UserWithOrders, error) {
     query := `
-        SELECT u.id, u.name, o.id as order_id, o.total
-        FROM users u
-        LEFT JOIN orders o ON u.id = o.user_id
+        select u.id, u.name, o.id as order_id, o.total
+        from users u
+        left join orders o on u.id = o.user_id
     `
     // ... implementation
 }

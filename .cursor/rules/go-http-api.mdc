@@ -4,4 +4,4 @@ alwaysApply: true
 ---
 
 
-@../../shared/go-http-api.md
+@../../shared-prompts/go-http-api.md

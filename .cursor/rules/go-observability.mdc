@@ -2,4 +2,4 @@
 alwaysApply: true
 ---
 
-@../../go-observability.md
+@../../shared-prompts/go-observability.md

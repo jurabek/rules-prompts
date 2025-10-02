@@ -3,4 +3,4 @@ globs: **/repository/**/*.go,**/repositories/**/*.go,**/database/**/*.go,**/db/*
 alwaysApply: false
 ---
 
-@../../go-database.md
+@../../shared-prompts/go-database.md

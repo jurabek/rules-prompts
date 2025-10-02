@@ -3,4 +3,4 @@ alwaysApply: true
 ---
 
 
-@../../shared/go-core-practices.md
+@../../shared-prompts/go-core-practices.md

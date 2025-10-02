@@ -2,4 +2,4 @@
 globs: **/*_test.go,**/test/**/*.go,**/tests/**/*.go
 ---
 
-@../../shared/go-testing.md
+@../../shared-prompts/go-testing.md
