@@ -4,9 +4,11 @@
 
 ### SQL Operations
 - Use **sqlx** for enhanced SQL operations.
-- Use **standard sql package** as foundation.
-- Leverage `sqlx for named operations` instead paramed queries.
+- Use **standard sql package** as foundation, most of the time I use postgresql.
+- Leverage `sqlx` for named operations instead of parameterized queries.
 - Define DbExecutor global interface in db layer for all DB operation that is compatible with `*sqlx.DB` and `*sqlx.Tx`, and use this interface on each repository methods
+- Use always lower case SQL syntax for better readability. e.g `select`, `from`, `where` etc.
+- Avoid SQL functions and triggers in favor of application logic.
 
 
 ### Example Usage

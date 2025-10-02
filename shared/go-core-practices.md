@@ -1,7 +1,3 @@
----
-alwaysApply: true
----
-
 # Go Core Development Practices
 
 ## General Responsibilities
