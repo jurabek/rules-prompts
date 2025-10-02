@@ -8,7 +8,7 @@
 @./shared-prompts/go-database.md
 
 # Go HTTP Server and API Development
-@./shared-prompts/go-http.md-api.md
+@./shared-prompts/go-http-api.md
 
 # Go Observability and OpenTelemetry
 @./shared-prompts/go-observability.md
