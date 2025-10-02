@@ -1,0 +1,5 @@
+---
+globs: **/*_test.go,**/test/**/*.go,**/tests/**/*.go
+---
+
+@../../shared/go-testing.md

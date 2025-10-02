@@ -1,7 +1,3 @@
----
-globs: **/*_test.go,**/test/**/*.go,**/tests/**/*.go
----
-
 # Go Testing Best Practices
 
 ## Unit Testing
