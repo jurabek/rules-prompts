@@ -4,13 +4,80 @@
 
 ### SQL Operations
 - Use **sqlx** for enhanced SQL operations.
-- Use **standard sql package** as foundation, most of the time I use postgresql.
-- Leverage `sqlx` named operations instead of parameterized queries for complex struct mappings.
-- Define DbExecutor global interface in db layer for all DB operation that is compatible with `*sqlx.DB` and `*sqlx.Tx`, and use this interface on each repository methods
+- Use **standard sql package** as foundation.
+- Leverage `sqlx` named, queryx, operations instead of parameterized queries for complex struct mappings.
+- Define `DbExecutor` global interface in db layer for all DB operation that is compatible with `*sqlx.DB` and `*sqlx.Tx`, and use this interface on each repository methods.
 - Use always lower case SQL syntax for better readability. e.g `select`, `from`, `where` etc.
 - Avoid SQL functions and triggers in favor of application logic.
 
+### Guide to sqlx
+- Always use `QueryxContext`, `SelectContext`, `GetContext`, `NamedExecContext` methods instead of their non-context counterparts.
+- Use `PrepareNamedContext` for prepared statements with named parameters.
+- Use `sqlx.In` for queries with `IN` clause and slice parameters.
+- Always use StructScan for mapping query results to structs, and do not use `rows.Scan` by passing each field separately, unless it is necessary.
+```go
+      type Place struct {
+        Country       string
+        City          sql.NullString
+        TelephoneCode int `db:"telcode"`
+    }
+     
+    rows, err := db.QueryxContext(ctx, "select * from place") // or sqlx.NamedQueryContext(ctx, dbExec, query, args) for named queries
+    for rows.Next() {
+        var p Place
+        err = rows.StructScan(&p)
+    }
+```
+- If querying a single row, use `GetContext` or `QueryRowContext` for better error handling and struct mapping.
+```go
+	var p Place
+	err := db.GetContext(ctx, &p, "select * from place where country=$1", country)
 
+	// or 
+	var p Place
+    err := db.QueryRowx("SELECT city, telcode FROM place LIMIT 1").StructScan(&p)
+	
+```
+- If there need for mapping json/jsonb columns to struct/map fields, implement `sql.Scanner` and `driver.Valuer` interfaces for custom types.
+```go
+	type JSONB map[string]interface{}
+
+	func (j *JSONB) Scan(value any) error {
+		switch v := val.(type) {
+		case []byte:
+			json.Unmarshal(v, &j)
+			return nil
+		case string:
+			json.Unmarshal([]byte(v), &j)
+			return nil
+		default:
+			return fmt.Errorf("unsupported type: %T", v)
+		}
+	}
+
+	func (j *JSONB) Value() (driver.Value, error) {
+		return json.Marshal(j)
+	}
+```
+- When executing Update, Insert or Delete statements, use `NamedExecContext` for better readability and maintainability, if there only single parameter just use $1, no need to use named parameters.
+```go
+type User struct {
+	ID    string `db:"id"`
+	Name  string `db:"name"`
+	Email string `db:"email"`
+}
+
+// named update or insert
+func UpdateUser(ctx context.Context, dbEx db.DbExecutor, user User) error {
+	updateUserQuery := `update users set name = :name, email = :email where id = :id`
+	_, err := dbEx.NamedExecContext(ctx, updateUserQuery, user)
+	if err != nil {
+		return fmt.Errorf("failed to update user: %w", err)
+	}
+	return nil
+}
+
+```
 ### Example Usage
 ```go
 
@@ -42,7 +109,7 @@ func (r *Repository) GetUser(ctx context.Context, dbExec db.DbExecutor, id strin
 
 func GetUser(ctx context.Context, dbExec db.DbExecutor, id string) (*User, error) {
     var user User
-    query := `SELECT id, name, email FROM users WHERE id = $1`
+    query := `select id, name, email from users where id = $1`
     
     err := dbExec.GetContext(ctx, &user, query, id)
     if err != nil {
@@ -67,6 +134,7 @@ func GetUser(ctx context.Context, dbExec db.DbExecutor, id string) (*User, error
 - Keep migrations small and focused.
 - Never modify existing migrations after deployment.
 - Use descriptive migration names.
+- When writing migrations, avoid complex logic; prefer simple SQL statements, and do not create SQL functions or triggers.
 
 ## Repository Pattern
 
@@ -134,35 +202,6 @@ func (tr *Transactioner) WithTx(ctx context.Context, opts *sql.TxOptions, fn fun
 - Check for specific error types (e.g., `sql.ErrNoRows`).
 - Provide meaningful error messages.
 
-```go
-type User struct {
-	Name string `db:"name"`
-	Email string `db:"email"`
-}
-
-func GetUser(ctx context.Context, db db.DbExecutor id string) (*User, error) {
-    var user User
-    err := db.GetContext(ctx, &user, query, id)
-    if err != nil {
-        if errors.Is(err, sql.ErrNoRows) {
-            return nil, ErrUserNotFound
-        }
-        return nil, fmt.Errorf("get user %s: %w", id, err)
-    }
-    return &user, nil
-}
-
-// named update or insert
-func UpdateUser(ctx context.Context, dbEx db.DbExecutor user User) error {
-	updateUserQuery := `update users set name = :name, email = :email where id = :id`
-	_, err := dbEx.NamedExecContext(ctx, updateUserQuery, user)
-	if err != nil {
-		return fmt.Errorf("failed to update user: %w", err)
-	}
-	return nil
-}
-```
-
 ## Query Optimization
 
 ### Best Practices
@@ -174,7 +213,7 @@ func UpdateUser(ctx context.Context, dbEx db.DbExecutor user User) error {
 
 ### Efficient Queries
 ```go
-// Good: Single query with JOIN
+// Good: Single query with JOIN and use StructScan by defining custom struct including fields from both tables
 func (r *Repository) GetUsersWithOrders(ctx context.Context) ([]UserWithOrders, error) {
     query := `
         select u.id, u.name, o.id as order_id, o.total
