@@ -195,6 +195,58 @@ func (tr *Transactioner) WithTx(ctx context.Context, opts *sql.TxOptions, fn fun
 }
 ```
 
+### Using transactional pattern with UnitOfWork
+```go
+type UnitOfWork struct {
+	Users UserRepository
+	Orders OrderRepository
+}
+type WithdrawalUowFactory struct {
+	tx     *database.Transactioner
+}
+func NewWithdrawalUowFactory(tx *database.Transactioner) *WithdrawalUowFactory {
+	return &WithdrawalUowFactory{
+		tx:     tx,
+	}
+}
+func (f *WithdrawalUowFactory) Execute(ctx context.Context, uowFn func(*UnitOfWork) error) error {
+	return f.tx.WithTx(ctx, nil, func(tx *sqlx.Tx) error {
+		return uowFn(&UnitOfWork{
+			Users:   NewUserRepository(tx),
+			Orders:  NewOrderRepository(tx),
+		})
+	})
+}
+
+// on the service layer
+type withdrawalUowFactory interface {
+	Execute(ctx context.Context, uowFn func(*UnitOfWork) error) error
+}
+
+type Service struct {
+	uow withdrawalUowFactory
+}
+
+func (s *Service) SomeWork() {
+	s.uow.Execute(ctx, func(uow UnitOfWork) error {
+        // Get user with row lock
+        user, err := uow.Users.GetByIDForUpdate(ctx, userID)
+        if err != nil {
+            return fmt.Errorf("failed to get user: %w", err)
+        }
+        
+        // Get orders with row lock  
+        orders, err := uow.Orders.GetByIDForUpdate(ctx, orderId)
+        if err != nil {
+            return fmt.Errorf("failed to get order: %w", err)
+        }
+        return nil
+    })
+}
+```
+
+
+
 ## Error Handling
 
 ### Database Errors
