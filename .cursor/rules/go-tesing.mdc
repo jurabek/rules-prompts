@@ -1,5 +1,0 @@
----
-globs: **/*_test.go,**/test/**/*.go,**/tests/**/*.go
----
-
-@../../shared-prompts/go-testing.md

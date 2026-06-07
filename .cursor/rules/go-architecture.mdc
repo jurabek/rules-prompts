@@ -1,6 +1,0 @@
----
-globs: *.go
-description:  Guideline for how to designing Golang applications 
----
-
-@../../shared-prompts/go-architecture.md

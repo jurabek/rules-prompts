@@ -1,6 +1,0 @@
----
-globs: *.go
----
-
-
-@../../shared-prompts/go-core-practices.md

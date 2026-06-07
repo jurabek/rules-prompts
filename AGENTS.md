@@ -1,0 +1,9 @@
+@./.agents/skills/project-rules/SKILL.md
+@./.agents/skills/clean-code/SKILL.md
+@./.agents/skills/go-architecture/SKILL.md
+@./.agents/skills/go-core-practices/SKILL.md
+@./.agents/skills/go-database/SKILL.md
+@./.agents/skills/go-sqlx/SKILL.md
+@./.agents/skills/go-http-api/SKILL.md
+@./.agents/skills/go-observability/SKILL.md
+@./.agents/skills/go-testing/SKILL.md

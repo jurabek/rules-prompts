@@ -1,5 +1,0 @@
----
-globs: *.go
----
-
-@../../shared-prompts/go-observability.md

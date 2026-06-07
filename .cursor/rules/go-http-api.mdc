@@ -1,6 +1,0 @@
----
-globs: **/handlers/**/*.go,**/*handler*.go,**/cmd/**/*.go,**/api/**/*.go
----
-
-
-@../../shared-prompts/go-http-api.md

@@ -1,6 +1,0 @@
----
-globs: **/repository/**/*.go,**/repositories/**/*.go,**/database/**/*.go,**/db/**/*.go,**/migrations/**/*.go
-alwaysApply: false
----
-
-@../../shared-prompts/go-sqlx.md
